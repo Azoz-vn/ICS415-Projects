@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bézier Curve Editor</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    canvas {
+      display: block;
+    }
+    #instructions {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.8);
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="instructions">
+    <b>Bézier Curve Editor</b><br/>
+    Click to add control points (every 3 points = 1 Bézier curve).<br/>
+    Drag points to modify.<br/>
+    Press <kbd>r</kbd> to reset.
+  </div>
+  <canvas id="canvas"></canvas>
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener("resize", () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      draw();
+    });
+
+    let points = [];
+    let draggingPoint = null;
+    const radius = 6;
+
+    canvas.addEventListener("mousedown", (e) => {
+      const { offsetX: x, offsetY: y } = e;
+      for (const p of points) {
+        if (Math.hypot(p.x - x, p.y - y) < radius * 2) {
+          draggingPoint = p;
+          return;
+        }
+      }
+      points.push({ x, y });
+      draw();
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (draggingPoint) {
+        draggingPoint.x = e.offsetX;
+        draggingPoint.y = e.offsetY;
+        draw();
+      }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      draggingPoint = null;
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === 'r') {
+        points = [];
+        draw();
+      }
+    });
+
+    function drawPoint(p, color = 'blue') {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.strokeStyle = 'black';
+      ctx.stroke();
+    }
+
+    function drawCurve(p0, p1, p2, p3) {
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.bezierCurveTo(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y);
+      ctx.strokeStyle = "red";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Control lines
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p3.x, p3.y);
+      ctx.strokeStyle = "gray";
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < points.length; i++) {
+        drawPoint(points[i]);
+      }
+
+      for (let i = 0; i + 3 < points.length; i += 3) {
+        drawCurve(points[i], points[i + 1], points[i + 2], points[i + 3]);
+      }
+    }
+
+    draw();
+  </script>
+</body>
+</html>
