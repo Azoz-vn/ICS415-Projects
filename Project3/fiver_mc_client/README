@@ -1,6 +1,6 @@
-# Minecraft Clone (Voxel Game)
+# Minecraft
 
-A voxel-based 3D game engine inspired by Minecraft, written in C++ using OpenGL for rendering. This project features basic mechanics like world generation, player movement, block interaction (placing and breaking), and raycasting for block selection.
+written in C++ using OpenGL for rendering. This project features basic mechanics like world generation, player movement, block interaction (placing and breaking), and raycasting for block selection.
 
 ## Features
 - **Chnunk System**: Chunks are organized into a world struct.
@@ -9,18 +9,6 @@ A voxel-based 3D game engine inspired by Minecraft, written in C++ using OpenGL 
 - **Raycasting**: Select blocks for interaction based on mouse position.
 - **Voxel Engine**: Efficient handling of large-scale 3D worlds.
 
-## Prerequisites
-
-To build and run this project, you’ll need the following:
-
-- **C++14** or later
-- **CMake** 3.10 or later
-- **OpenGL** 3.3 or later
-- **STB** 
-
-I have provided glad and stb in the depend folder.
-
-## Building the Project
 
 mkdir build
 cd build
