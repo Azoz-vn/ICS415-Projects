@@ -2,61 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Bézier Curve Editor</title>
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: sans-serif;
+    * {
+      box-sizing: border-box;
     }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
+    }
+
+    #toolbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px;
+      background-color: #ffffffee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    #toolbar button {
+      padding: 8px 12px;
+      margin-right: 10px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    #toolbar button:hover {
+      background-color: #0056b3;
+    }
+
+    #toolbar span {
+      font-size: 14px;
+      color: #555;
+    }
+
     canvas {
       display: block;
-    }
-    #instructions {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(255,255,255,0.8);
-      padding: 10px;
-      border-radius: 8px;
     }
   </style>
 </head>
 <body>
-  <div id="instructions">
-    <b>Bézier Curve Editor</b><br/>
-    Click to add control points (every 3 points = 1 Bézier curve).<br/>
-    Drag points to modify.<br/>
-    Press <kbd>r</kbd> to reset.
+  <div id="toolbar">
+    <div>
+      <button onclick="toggleAddMode()" id="addModeBtn">🖱️ Add Mode: Off</button>
+      <button onclick="resetPoints()">🔄 Reset</button>
+    </div>
+    <span id="status">Points: 0</span>
   </div>
+
   <canvas id="canvas"></canvas>
+
   <script>
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     let width = canvas.width = window.innerWidth;
     let height = canvas.height = window.innerHeight;
 
-    window.addEventListener("resize", () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      draw();
-    });
-
     let points = [];
     let draggingPoint = null;
     const radius = 6;
+    let addMode = false;
+
+    function updateCanvasSize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+      draw();
+    }
+
+    function updateStatus() {
+      document.getElementById("status").textContent = `Points: ${points.length}`;
+    }
+
+    function toggleAddMode() {
+      addMode = !addMode;
+      const btn = document.getElementById("addModeBtn");
+      btn.textContent = `🖱️ Add Mode: ${addMode ? "On" : "Off"}`;
+    }
+
+    function resetPoints() {
+      points = [];
+      draw();
+    }
+
+    window.addEventListener("resize", updateCanvasSize);
 
     canvas.addEventListener("mousedown", (e) => {
       const { offsetX: x, offsetY: y } = e;
+
+      if (addMode) {
+        points.push({ x, y });
+        draw();
+        return;
+      }
+
       for (const p of points) {
         if (Math.hypot(p.x - x, p.y - y) < radius * 2) {
           draggingPoint = p;
           return;
         }
       }
-      points.push({ x, y });
-      draw();
     });
 
     canvas.addEventListener("mousemove", (e) => {
@@ -69,13 +127,6 @@
 
     canvas.addEventListener("mouseup", () => {
       draggingPoint = null;
-    });
-
-    window.addEventListener("keydown", (e) => {
-      if (e.key === 'r') {
-        points = [];
-        draw();
-      }
     });
 
     function drawPoint(p, color = 'blue') {
@@ -109,6 +160,21 @@
 
     function draw() {
       ctx.clearRect(0, 0, width, height);
+      for (let i = 0; i < points.length; i++) {
+        drawPoint(points[i]);
+      }
+      for (let i = 0; i + 3 < points.length; i += 3) {
+        drawCurve(points[i], points[i + 1], points[i + 2], points[i + 3]);
+      }
+      updateStatus();
+    }
+
+    // Initialize
+    updateCanvasSize();
+  </script>
+</body>
+</html>
+ctx.clearRect(0, 0, width, height);
       for (let i = 0; i < points.length; i++) {
         drawPoint(points[i]);
       }
